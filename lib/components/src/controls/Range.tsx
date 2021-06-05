@@ -1,12 +1,87 @@
-import React, { FC, ChangeEvent } from 'react';
-
+import React, { useEffect, useState, useRef } from 'react';
 import { styled } from '@storybook/theming';
 import { lighten, darken, rgba } from 'polished';
-import { getControlId } from './helpers';
-import { ControlProps, NumberValue, RangeConfig } from './types';
+import { useMeasure } from '../hooks/useMeasure';
 import { parse } from './Number';
+import { countDecimalDigits, countWholeDigits, getControlId } from './helpers';
 
-type RangeProps = ControlProps<NumberValue | null> & RangeConfig;
+// eslint-disable-next-line import/order
+import type { ChangeEvent } from 'react';
+import type { ControlProps, NumberValue, RangeConfig } from './types';
+
+type RangeControlProps = ControlProps<NumberValue | null> & RangeConfig;
+
+export const RangeControl = ({
+  name,
+  value,
+  onChange,
+  min = 0,
+  max = 100,
+  step = 1,
+  onBlur,
+  onFocus,
+}: RangeControlProps) => {
+  const [currentLabelMinWidth, setCurrentLabelMinWidth] = useState(0);
+  const widthCheckerRef = useRef(null);
+  const widthChecker = useMeasure(widthCheckerRef);
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange(parse(event.target.value));
+  };
+
+  const hasValue = value !== undefined;
+  const stepDigits = countDecimalDigits(step);
+  const maxDigits = countWholeDigits(max);
+  const checkerString = `${maxDigits > 0 ? '0'.repeat(maxDigits) : ''}${
+    stepDigits > 0 ? `.${'0'.repeat(stepDigits)}` : ''
+  }`;
+
+  useEffect(() => {
+    setCurrentLabelMinWidth(widthChecker.width);
+  }, [widthChecker, setCurrentLabelMinWidth]);
+
+  return (
+    <>
+      <CurrentLabelMaxWidthChecker ref={widthCheckerRef}>
+        {checkerString}
+      </CurrentLabelMaxWidthChecker>
+      <RangeWrapper>
+        <RangeLabel>{min}</RangeLabel>
+        <RangeInput
+          id={getControlId(name)}
+          type="range"
+          onChange={handleChange}
+          {...{ name, value, min, max, step, onFocus, onBlur }}
+        />
+        <RangeLabel>
+          <CurrentLabel minWidth={currentLabelMinWidth}>
+            {hasValue ? value.toFixed(stepDigits) : '--'}
+          </CurrentLabel>
+          <LabelSeparator>/</LabelSeparator>
+          <MaxLabel>{max}</MaxLabel>
+        </RangeLabel>
+      </RangeWrapper>
+    </>
+  );
+};
+
+const CurrentLabelMaxWidthChecker = styled.div({
+  position: 'absolute',
+  visibility: 'hidden',
+  top: 0,
+  left: 0,
+  opacity: 0,
+  padding: 0,
+  margin: 0,
+  fontSize: 12,
+  zIndex: -1,
+});
+
+const RangeWrapper = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+  width: '100%',
+});
 
 const RangeInput = styled.input(({ theme }) => ({
   // Resytled using http://danielstern.ca/range.css/#/
@@ -144,38 +219,21 @@ const RangeLabel = styled.span({
   paddingRight: 5,
   fontSize: 12,
   whiteSpace: 'nowrap',
-});
-
-const RangeWrapper = styled.div({
   display: 'flex',
   alignItems: 'center',
-  width: '100%',
 });
 
-export const RangeControl: FC<RangeProps> = ({
-  name,
-  value,
-  onChange,
-  min = 0,
-  max = 100,
-  step = 1,
-  onBlur,
-  onFocus,
-}) => {
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange(parse(event.target.value));
-  };
-  const hasValue = value !== undefined;
-  return (
-    <RangeWrapper>
-      <RangeLabel>{min}</RangeLabel>
-      <RangeInput
-        id={getControlId(name)}
-        type="range"
-        onChange={handleChange}
-        {...{ name, value, min, max, step, onFocus, onBlur }}
-      />
-      <RangeLabel>{`${hasValue ? value : '--'} / ${max}`}</RangeLabel>
-    </RangeWrapper>
-  );
-};
+interface CurrentLabelProps {
+  minWidth: number;
+}
+
+const CurrentLabel = styled.div<CurrentLabelProps>(({ minWidth }) => ({
+  minWidth,
+  textAlign: 'right',
+}));
+
+const LabelSeparator = styled.div({
+  margin: '0 2px',
+});
+
+const MaxLabel = styled.div({});
