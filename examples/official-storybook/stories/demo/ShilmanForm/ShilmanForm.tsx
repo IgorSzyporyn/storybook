@@ -35,14 +35,14 @@ interface FormValues extends ShilmanFormValues {
 type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 type ShilmanFormProps = {
-  verifyPassword?: boolean;
+  passwordVerification?: boolean;
   onSubmit?: (values: ShilmanFormValues) => void;
   onTransactionStart?: (values: ShilmanFormValues) => void;
   onTransactionEnd?: (values: ShilmanFormResponse) => void;
 };
 
 export const ShilmanForm: FC<ShilmanFormProps> = ({
-  verifyPassword,
+  passwordVerification,
   onSubmit,
   onTransactionStart,
   onTransactionEnd,
@@ -88,7 +88,7 @@ export const ShilmanForm: FC<ShilmanFormProps> = ({
         transactionFailure: success === false,
       });
     },
-    []
+    [setState, onTransactionEnd, onTransactionStart]
   );
 
   return (
@@ -163,9 +163,9 @@ export const ShilmanForm: FC<ShilmanFormProps> = ({
                 errors.password = 'Please enter a password of minimum 6 characters';
               }
 
-              if (verifyPassword && !verifyPassword) {
+              if (passwordVerification && !verifiedPassword) {
                 errors.verifiedPassword = 'Please verify your password';
-              } else if (verifyPassword && password !== verifiedPassword) {
+              } else if (passwordVerification && password !== verifiedPassword) {
                 errors.verifiedPassword = 'Your passwords do not match';
               }
 
@@ -176,12 +176,13 @@ export const ShilmanForm: FC<ShilmanFormProps> = ({
               <Form aria-disabled={isSubmitting ? 'true' : 'false'}>
                 <FieldWrapper>
                   <Label htmlFor="email">Email</Label>
-                  <FormikInput id="email" name="email" type="email">
+                  <FormikInput id="email" name="email">
                     {({ field }: { field: HTMLAttributes<HTMLInputElement> }) => (
                       <Input
                         aria-required="true"
                         aria-disabled={isSubmitting ? 'true' : 'false'}
                         disabled={isSubmitting}
+                        type="email"
                         aria-invalid={errors.email ? 'true' : 'false'}
                         {...field}
                       />
@@ -191,12 +192,13 @@ export const ShilmanForm: FC<ShilmanFormProps> = ({
                 </FieldWrapper>
                 <FieldWrapper>
                   <Label htmlFor="password">Password</Label>
-                  <FormikInput id="password" type="password" name="password">
+                  <FormikInput id="password" name="password">
                     {({ field }: { field: HTMLAttributes<HTMLInputElement> }) => (
                       <Input
                         aria-required="true"
                         aria-disabled={isSubmitting ? 'true' : 'false'}
                         aria-invalid={errors.password ? 'true' : 'false'}
+                        type="password"
                         disabled={isSubmitting}
                         {...field}
                       />
@@ -204,15 +206,16 @@ export const ShilmanForm: FC<ShilmanFormProps> = ({
                   </FormikInput>
                   <Error name="password" component="div" />
                 </FieldWrapper>
-                {verifyPassword && (
+                {passwordVerification && (
                   <FieldWrapper>
-                    <Label htmlFor="verifiedPassword">Password</Label>
-                    <FormikInput id="verifiedPassword" name="verifiedPassword" type="password">
+                    <Label htmlFor="verifiedPassword">Verify Password</Label>
+                    <FormikInput id="verifiedPassword" name="verifiedPassword">
                       {({ field }: { field: HTMLAttributes<HTMLInputElement> }) => (
                         <Input
                           aria-required="true"
                           aria-disabled={isSubmitting ? 'true' : 'false'}
                           aria-invalid={errors.verifiedPassword ? 'true' : 'false'}
+                          type="password"
                           disabled={isSubmitting}
                           {...field}
                         />

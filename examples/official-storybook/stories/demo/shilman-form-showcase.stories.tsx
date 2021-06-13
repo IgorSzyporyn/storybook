@@ -14,5 +14,5 @@ const Template: ComponentStory<typeof ShilmanForm> = (args) => <ShilmanForm {...
 
 export const Controllable = Template.bind({});
 Controllable.args = {
-  verifyPassword: false,
+  passwordVerification: false,
 };
