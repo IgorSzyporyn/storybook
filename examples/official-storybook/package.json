@@ -11,6 +11,9 @@
     "storybook": "cross-env STORYBOOK_DISPLAY_WARNING=true DISPLAY_WARNING=true start-storybook -p 9011 -c ./",
     "storyshots-puppeteer": "yarn run build-storybook && yarn run do-storyshots-puppeteer"
   },
+  "dependencies": {
+    "formik": "^2.2.9"
+  },
   "devDependencies": {
     "@packtracker/webpack-plugin": "^2.3.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
