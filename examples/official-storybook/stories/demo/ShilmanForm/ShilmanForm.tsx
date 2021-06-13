@@ -163,6 +163,12 @@ export const ShilmanForm: FC<ShilmanFormProps> = ({
                 errors.password = 'Please enter a password of minimum 6 characters';
               }
 
+              if (verifyPassword && !verifyPassword) {
+                errors.verifiedPassword = 'Please verify your password';
+              } else if (verifyPassword && password !== verifiedPassword) {
+                errors.verifiedPassword = 'Your passwords do not match';
+              }
+
               return errors;
             }}
           >
